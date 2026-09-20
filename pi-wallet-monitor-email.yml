@@ -1,0 +1,44 @@
+name: Pi Wallet Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check wallets and send email alerts
+        env:
+          ALERT_EMAIL_FROM: ${{ secrets.ALERT_EMAIL_FROM }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python pi_wallet_monitor.py
+
+      - name: Save monitoring state
+        run: |
+          if git diff --quiet -- wallet_state.json; then
+            echo "No state changes."
+            exit 0
+          fi
+          git config user.name "pi-wallet-monitor"
+          git config user.email "actions@users.noreply.github.com"
+          git add wallet_state.json
+          git commit -m "Update wallet monitor state [skip ci]"
+          git push
