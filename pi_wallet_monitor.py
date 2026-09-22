@@ -15,6 +15,7 @@ WALLET_GROUPS = {
     "WCD": "pi_wallets_wcd.csv",
     "RP": "pi_wallets_rp.csv",
     "LP": "pi_wallets_lp.csv",
+    "Pi done by me and others": "pi_wallets_donebymeothers.csv",
 }
 
 def parse_iso_timestamp(value):
